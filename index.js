@@ -5,14 +5,13 @@ const axios = require('axios');
 const google = require("google-finance-data");
 const environment = process.env;
 
-app.use(bodyParser.json()) // for parsing application/json
+app.use(bodyParser.json())
 app.use(
   bodyParser.urlencoded({
     extended: true
   })
 )
 
-//This is the route the API will call
 function response(message, res, responseText = 'Bad Request: You should feel Bad') {
   axios.post(
     `https://api.telegram.org/bot${environment.TELEGRAM_KEY}/sendMessage`,
@@ -33,17 +32,13 @@ app.post('/stonks', function(req, res) {
   const { message } = req.body
   if (!message || !message.text) { return res.end('OK'); }
 
+  // To send to the API later
   const user = { id: message.from.id, first_name: message.from.first_name, username: message.from.username };
-  // user = {
-  //   id,
-  //   name,
-  //   username
-  // }
+
   const commands = message.text.split(' ');
 
   if (commands[0] === '/check' && commands[1]) {
     google.getSymbol(commands[1]).then((data) => {
-      console.log(data);
       response(message, res, `${commands[1]}: ${data.ticker}`);
     }).catch((err) => {
       console.log(err);
@@ -54,11 +49,11 @@ app.post('/stonks', function(req, res) {
     // MEME CODE
     axios.get('https://www.reddit.com/r/stonks/hot.json').then(result => {
       if (result && result.data && result.data.data && result.data.data.children) {
-        var children = result.data.data.children;
-        var cleanChildren = children.filter(c => c.data.url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/));
+        const children = result.data.data.children;
+        const cleanChildren = children.filter(c => c.data.url.match(/(http)?s?:?(\/\/[^"']*\.(?:png|jpg|jpeg|gif|png|svg))/));
         if (cleanChildren.length) {
           console.log('Reddit Request Success!');
-          var index = Math.floor(Math.random() * cleanChildren.length);
+          const index = Math.floor(Math.random() * cleanChildren.length);
           if (cleanChildren[index].data.over_18) {
             appResponse = 'Hey ' + user + ', this is an NSFW link: <code>' + cleanChildren[index].data.url + '</code> \n Enjoy it you perv';
           } else {
@@ -76,7 +71,6 @@ app.post('/stonks', function(req, res) {
   }
 });
 
-// Finally, start our server
 app.listen(3000, function() {
   console.log('Telegram app listening on port 3000!')
 })
